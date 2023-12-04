@@ -1,0 +1,40 @@
+{
+  "name": "botway.js",
+  "version": "0.0.9",
+  "description": "Nodejs client for botway.",
+  "author": "@abdfnx",
+  "homepage": "https://github.com/abdfnx/botway",
+  "bugs": "https://github.com/abdfnx/botway/issues",
+  "repository": "abdfnx/botway",
+  "main": "lib/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "pnpm build"
+  },
+  "keywords": [
+    "bot",
+    "client",
+    "bot-api",
+    "botway"
+  ],
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.9.4",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/lib"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "copyRight": "Copyright (c) 2023 @abdfnx"
+}

@@ -1,0 +1,77 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  BOTWAY_UNIX_PATH: /usr/local/bin
+  BOTWAY_WINDOWS_PATH: ~\AppData\Local\botway\bin
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  bfs:
+    cmds:
+      - task: remove
+      - task: build
+      - task: install
+
+  remove:
+    cmds:
+      - if [ -f {{ .BOTWAY_UNIX_PATH }}/botway ]; then sudo rm {{ .BOTWAY_UNIX_PATH }}/botway; fi
+
+  install:
+    cmds:
+      - sudo cp botway {{ .BOTWAY_UNIX_PATH }}
+
+  release:
+    cmds:
+      - BuildDate="{{.BUILD_DATE}}" goreleaser release --rm-dist --timeout 100m
+
+    vars:
+      BUILD_DATE:
+        sh: go run ./scripts/date.go
+
+  build:
+    aliases: [b]
+    cmds:
+      - go mod tidy
+      - go build -ldflags "-X main.version={{.VERSION}} -X main.buildDate={{.BUILD_DATE}}" -o botway{{exeExt}}
+
+    vars:
+      VERSION:
+        sh: git describe --abbrev=0 --tags
+      BUILD_DATE:
+        sh: go run ./scripts/date.go
+
+  docker:
+    cmds:
+      - '{{if eq OS "windows"}}.\docker\build.ps1{{else}}./docker/build.sh{{end}}'
+
+  build-full-image:
+    dir: ./docker
+    cmds:
+      - docker build -t botwayorg/botway:full --file full.dockerfile .
+      - docker push botwayorg/botway:full
+
+  remove-docker-images:
+    cmds:
+      - docker rmi $(docker images -a -q)
+
+  upload-scoop-manifest:
+    cmds:
+      - '{{if eq OS "windows"}}if (Test-Path "botway.json") { Remove-Item -Path botway.json -Recurse -Force }{{else}}if [ -f "botway.json" ]; then rm botway.json; fi{{end}}'
+      - cp '{{fromSlash "./dist/botway.json"}}' .
+
+  botway-py-upload:
+    dir: ./packages/botway.py
+    cmds:
+      - '{{if eq OS "windows"}}python -m build{{else}}python3 -m build{{end}}'
+      - '{{if eq OS "windows"}}python -m twine check dist/*{{else}}python3 -m twine check dist/*{{end}}'
+      - '{{if eq OS "windows"}}python -m twine upload dist/*{{else}}python3 -m twine upload dist/*{{end}}'
+      - '{{if eq OS "windows"}}Remove-Item -Path dist *.egg-info -Recurse -Force{{else}}rm -rf dist *.egg-info{{end}}'
+
+  clone-submodules:
+    cmds:
+      - git submodule update --init --recursive

@@ -1,0 +1,102 @@
+name: Botway CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+  bfs: # build from source
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.21"
+
+      - name: Set up Task
+        uses: arduino/setup-task@v1
+
+      - name: Building From Source
+        run: task bfs
+
+      - name: Run Version
+        run: botway -v
+
+  from-script:
+    needs: [bfs]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install from script
+        run: curl -sL https://dub.sh/botway | bash
+
+      - name: Run Version
+        run: botway -v
+
+  from-script-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install from script
+        run: |
+          irm https://dub.sh/bw-win | iex
+          echo "::add-path::C:\Users\runneradmin\AppData\Local\botway\bin\;"
+
+      - name: Run Version
+        run: botway -v
+
+  homebrew:
+    needs: [bfs]
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Get Botway via homebrew
+        run: brew install abdfnx/tap/botway
+
+      - name: Run Version
+        run: botway -v
+
+  docker:
+    needs: [bfs, from-script]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Run in docker container
+        run: docker run --rm -i botwayorg/botway -v

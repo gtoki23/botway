@@ -1,0 +1,31 @@
+{
+  "search.exclude": {
+    "node_modules/**": true,
+    ".next/**": true
+  },
+  "editor.formatOnSave": true,
+  "editor.fontFamily": "FiraCode NF",
+  "editor.fontLigatures": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "workbench.colorTheme": "GitHub Dark Default",
+  "workbench.iconTheme": "material-icon-theme",
+  "redhat.telemetry.enabled": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "go.toolsManagement.checkForUpdates": "local",
+  "go.useLanguageServer": true,
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  }
+}

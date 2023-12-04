@@ -1,0 +1,95 @@
+project_name: botway
+
+env:
+  - CGO_ENABLED=0
+
+release:
+  prerelease: auto
+  draft: true
+  name_template: "Botway 🤖 {{ .Tag }}"
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - <<: &build_defaults
+      binary: bin/botway
+      main: ./
+      ldflags:
+        - -X main.version={{ .Tag }}
+        - -X main.buildDate={{ .Env.BuildDate }}
+
+    id: darwin
+    goos: [darwin]
+    goarch: [amd64, arm64, arm]
+
+  - <<: *build_defaults
+    id: linux
+    goos: [linux]
+    goarch: [amd64, arm64, arm, "386"]
+
+  - <<: *build_defaults
+    id: windows
+    goos: [windows]
+    goarch: [amd64, arm64, arm, "386"]
+
+  - <<: *build_defaults
+    id: freebsd
+    goos: [freebsd]
+    goarch: [amd64, arm64, arm, "386"]
+
+archives:
+  - id: unix
+    builds: [darwin, linux, freebsd]
+    <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Tag }}_{{ .Arch }}"
+
+    wrap_in_directory: "true"
+    format: zip
+    files:
+      - LICENSE
+
+  - id: windows
+    builds: [windows]
+    <<: *archive_defaults
+    wrap_in_directory: "false"
+    format: zip
+    files:
+      - LICENSE
+
+nfpms:
+  - license: MIT
+    maintainer: botway
+    homepage: https://github.com/abdfnx/botway
+    bindir: /usr
+    file_name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Arch }}"
+    description: "🤖 Generate, build, handle and deploy your own bot with your favorite language, for Discord, or Telegram, or Slack, or even Twitch"
+    formats:
+      - apk
+      - deb
+      - rpm
+
+brews:
+  - goarm: 6
+    tap:
+      owner: abdfnx
+      name: homebrew-tap
+    homepage: "https://github.com/abdfnx/botway"
+    description: "🤖 Generate, build, handle and deploy your own bot with your favorite language, for Discord, or Telegram, or Slack, or even Twitch"
+    license: MIT
+
+scoop:
+  url_template: "https://github.com/abdfnx/botway/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+  bucket:
+    owner: abdfnx
+    name: botway
+  homepage: "https://botway.deno.dev"
+  description: "🤖 Generate, build, handle and deploy your own bot with your favorite language, for Discord, or Telegram, or Slack, or even Twitch"
+  license: MIT
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ .Version }}-next"

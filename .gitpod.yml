@@ -1,0 +1,17 @@
+image:
+  file: .gitpod/Dockerfile
+
+tasks:
+  - name: Setup Botway
+    init: go mod download
+    command: go get -u
+
+  - name: Setup Botway UI
+    init: pnpm i
+    command: pnpm dev
+
+ports:
+  - port: 3000
+    onOpen: open-browser
+    name: Botway UI
+    description: Botway UI Preview

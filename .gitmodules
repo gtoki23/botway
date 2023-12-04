@@ -1,0 +1,20 @@
+[submodule "packages/botwaygo"]
+	path = packages/botwaygo
+	url = https://github.com/abdfnx/botwaygo
+	branch = main
+[submodule "packages/botwaycr"]
+	path = packages/botwaycr
+	url = https://github.com/abdfnx/botwaycr
+	branch = main
+[submodule "create-botway-bot"]
+	path = create-botway-bot
+	url = https://github.com/abdfnx/create-botway-bot
+	branch = main
+[submodule "templates"]
+	path = templates
+	url = https://github.com/botwayorg/templates
+	branch = main
+[submodule "ce"]
+	path = ce
+	url = https://github.com/botwayorg/ce
+	branch = main

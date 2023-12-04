@@ -1,0 +1,14 @@
+author: bw
+bot:
+  host_service: zeabur.com
+  lang: deno
+  name: botx
+  package_manager: deno
+  start_cmd: deno run --allow-all main.ts
+  type: discord
+docker:
+  cmds:
+    build: docker build -t botway-local/botx .
+    run: docker run -it botway-local/botx
+  enable_buildkit: true
+  image: botway-local/botx

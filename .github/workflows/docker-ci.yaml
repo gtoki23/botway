@@ -1,0 +1,28 @@
+name: Botway Docker CI
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  BW_SECRET_KEY: ${{ secrets.BW_SECRET_KEY }}
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_ID }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set up Task
+        uses: arduino/setup-task@v1
+
+      - name: Build All Tags
+        run: task docker

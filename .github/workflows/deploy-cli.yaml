@@ -1,0 +1,59 @@
+name: Deploy To Botway CLI
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  deploy-botway-cli:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Botway CLI installers
+        env:
+          PACKAGES: "libxml2 libpq-dev build-essential openssl cmake libssl-dev musl-dev gcc lld clang patch libgmp-dev libmpfr-dev mpc perl libsodium-dev ffmpeg libopus-dev autoconf automake libtool bash"
+          LINUX_TARGET_PATH: "./target/release"
+          DARWIN_TARGET_PATH: "./target/x86_64-apple-darwin/release"
+          INSTALLERS_DIR_PATH: "./static/installers"
+        run: |
+          sudo apt-get update -y --fix-missing && sudo apt-get upgrade -y --fix-missing
+          sudo apt-get install $PACKAGES -y --fix-missing
+
+          # Build Botway Linux Installer
+          cd ./installer
+          cargo build --release
+          cp $LINUX_TARGET_PATH/botway-installer ./installer-linux
+          cp ./installer-linux ../assets/static/installers
+
+          # Build Botway OSX Installer
+          git clone https://github.com/abdfnx/osxcross-alpine osxcross
+          cd osxcross
+          wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz
+          mv MacOSX10.10.sdk.tar.xz tarballs/
+          UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
+          rustup target add x86_64-apple-darwin
+          cd ..
+          PATH="$(pwd)/osxcross/target/bin:$PATH" \
+          CC=o64-clang \
+          CXX=o64-clang++ \
+          LIBZ_SYS_STATIC=1 \
+          cargo build --release --target x86_64-apple-darwin && \
+          cp $DARWIN_TARGET_PATH/botway-installer ./installer-macos && \
+          cp ./installer-macos ../assets/static/installers
+
+      - name: Upload to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: "cli-botway"
+          entrypoint: ./main.ts
+          root: ./assets
